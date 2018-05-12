@@ -1,0 +1,10 @@
+version: '3'
+services:
+  composer:
+    build: ./composer
+    ports:
+      - 8080:8080
+      - 51000:51000
+    volumes:
+      - ./symfony:/home/docker/project/symfony
+    tty: true
