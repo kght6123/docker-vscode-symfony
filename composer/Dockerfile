@@ -1,11 +1,21 @@
 FROM php:7-alpine3.6
 LABEL maintainer="kght6123"
 
-RUN apk --update --no-cache add $PHPIZE_DEPS \
-unzip git vim wget shadow icu-dev sudo \
-freetype-dev libjpeg-turbo-dev libpng-dev
+RUN apk --no-cache update && \
+    apk --no-cache upgrade && \
+    apk --no-cache add $PHPIZE_DEPS \
+        curl-dev libxml2-dev zlib-dev pcre-dev g++ \
+        make autoconf openssl \
+        unzip git vim wget shadow icu-dev sudo \
+        freetype-dev libjpeg-turbo-dev libpng-dev \
+        nodejs-npm bash
 
-RUN docker-php-ext-install intl gd
+RUN docker-php-ext-install curl dom mbstring pdo pdo_mysql intl simplexml zip opcache && \
+    docker-php-ext-configure gd \
+        --with-freetype-dir=/usr/include/ \
+        --with-jpeg-dir=/usr/include/ \
+        --with-png-dir=/usr/include && \
+    docker-php-ext-install gd
 
 # add docker sudo user
 RUN groupadd -g 1000 docker && \
@@ -40,6 +50,9 @@ RUN docker-php-ext-enable xdebug
 
 # copy xdebug.ini
 COPY ./xdebug.ini /usr/local/etc/php/conf.d/
+
+# clear
+RUN rm -rf /var/cache/apk/*
 
 # 以降は、rootではなくdockerユーザで実行される
 # ENV HOME /home/docker
